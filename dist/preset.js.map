@@ -1,0 +1,1 @@
+{"version":3,"file":"preset.js","sourceRoot":"","sources":["../src/preset.ts"],"names":[],"mappings":"AAEA,MAAM,CAAC,MAAM,MAAM,GAAiB;IAClC,eAAe,EAAE,YAAY;IAC7B,MAAM,EAAE;QACN,KAAK,EAAE,aAAa;QACpB,KAAK,EAAE,aAAa;QACpB,MAAM,EAAE,cAAc;KACvB;CACF,CAAC"}
