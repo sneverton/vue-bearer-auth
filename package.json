@@ -1,6 +1,6 @@
 {
   "name": "@sneverton/vue-bearer-auth",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "./dist/index.js",
   "repository": "https://github.com/sneverton/vue-bearer-auth.git",
   "author": "Everton Andrade <everton@andrade.mat.br>",
