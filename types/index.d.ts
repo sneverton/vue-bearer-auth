@@ -1,4 +1,5 @@
 import { AxiosInstance, AxiosResponse } from "axios";
+import { PluginObject } from "vue";
 
 export interface State<U = unknown> {
   on: boolean;
@@ -37,17 +38,17 @@ export declare class Framework<
   public readonly $config: PresetConfig;
   public readonly state: State<StateU>;
 
-  public login(
+  public async login(
     data: LoginD,
     token: (data: LoginR) => string,
     user?: (data: LoginR) => StateU
   ): Promise<AxiosResponse<R>>;
 
-  public check(
+  public async check(
     user?: (data: CheckR) => StateU
   ): Promise<AxiosResponse<CheckR> | null>;
 
-  public logout(): Promise<AxiosResponse<LogoutR> | null>;
+  public async logout(): Promise<AxiosResponse<LogoutR> | null>;
 }
 
 declare const _default: PluginObject<Options>;

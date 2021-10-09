@@ -11,13 +11,11 @@ class Framework<
   LogoutR = unknown,
   StateU = unknown
 > {
-  protected readonly $axios: Options["axios"];
-
-  protected readonly $config: PresetConfig;
-
+  public readonly $axios: Options["axios"];
+  public readonly $config: PresetConfig;
   public readonly state: State<StateU>;
 
-  public constructor(Vue: VueConstructor, options: Options) {
+  constructor(Vue: VueConstructor, options: Options) {
     this.$axios = options.axios;
     this.$config = merge({}, preset, options.config);
 
