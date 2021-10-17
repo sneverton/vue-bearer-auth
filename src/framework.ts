@@ -21,8 +21,10 @@ class Framework<
 
     this.state = Vue.observable({
       on: false,
-      checking: true,
       user: null,
+      checking: false,
+      loggingIn: false,
+      loggingOut: false,
     });
   }
 
@@ -31,18 +33,31 @@ class Framework<
     token: (data: R) => string,
     user?: (data: R) => StateUser
   ): Promise<AxiosResponse<R>> {
-    const res = await this.$axios.post<R>(this.$config.routes.login, data);
+    if (this.state.on) throw new Error("O usuário já está on.");
 
-    localStorage.setItem(this.$config.localStorageKey, token(res.data));
+    this.state.on = false;
+    this.state.loggingIn = true;
 
-    if (user) this.state.user = user(res.data);
+    try {
+      const res = await this.$axios.post<R>(this.$config.routes.login, data);
 
-    return res;
+      localStorage.setItem(this.$config.localStorageKey, token(res.data));
+      this.state.on = true;
+
+      if (user) this.state.user = user(res.data);
+
+      return res;
+    } finally {
+      this.state.loggingIn = false;
+    }
   }
 
   public async check<R = CheckResponse>(
     user?: (data: R) => StateUser
   ): Promise<AxiosResponse<R> | null> {
+    if (this.state.on) throw new Error("O usuário já está on.");
+
+    this.state.checking = true;
     const token = localStorage.getItem(this.$config.localStorageKey);
 
     if (!token) {
@@ -54,28 +69,38 @@ class Framework<
 
     const headers = { Authorization: `Bearer ${token}` };
 
-    const res = await this.$axios.post<R>(this.$config.routes.check, null, {
-      headers,
-    });
+    try {
+      const res = await this.$axios.post<R>(this.$config.routes.check, null, {
+        headers,
+      });
 
-    this.state.checking = false;
-    this.state.on = true;
+      this.state.on = true;
 
-    if (user) this.state.user = user(res.data);
+      if (user) this.state.user = user(res.data);
 
-    return res;
+      return res;
+    } finally {
+      this.state.checking = false;
+    }
   }
 
   public async logout<R = LogoutResponse>(): Promise<AxiosResponse<R> | null> {
+    if (!this.state.on) throw new Error("O usuário já está off.");
+
     if (!this.state.on) return null;
+    this.state.loggingOut = true;
 
-    const res = await this.$axios.post<R>(this.$config.routes.logout);
+    try {
+      const res = await this.$axios.post<R>(this.$config.routes.logout);
 
-    this.state.on = false;
-    this.state.user = null;
-    localStorage.removeItem(this.$config.localStorageKey);
+      this.state.on = false;
+      this.state.user = null;
+      localStorage.removeItem(this.$config.localStorageKey);
 
-    return res;
+      return res;
+    } finally {
+      this.state.loggingOut = false;
+    }
   }
 }
 
