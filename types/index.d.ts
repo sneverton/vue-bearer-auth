@@ -5,6 +5,8 @@ export interface State<U = unknown> {
   on: boolean;
   checking: boolean;
   user: U | null;
+  loggingIn: boolean;
+  loggingOut: boolean;
 }
 
 export interface Routes {
@@ -26,29 +28,29 @@ export interface Options<R = Routes> {
 }
 
 export declare class Framework<
-  LoginD = unknown,
-  LoginR = unknown,
-  CheckR = unknown,
-  LogoutR = unknown,
-  StateU = unknown
+  LoginData = unknown,
+  LoginResponse = unknown,
+  CheckResponse = unknown,
+  LogoutResponse = unknown,
+  StateUser = unknown
 > {
   constructor(Vue: VueConstructor, options: Options);
 
   public readonly $axios: Options["axios"];
   public readonly $config: PresetConfig;
-  public readonly state: State<StateU>;
+  public readonly state: State<StateUser>;
 
   public async login(
-    data: LoginD,
-    token: (data: LoginR) => string,
-    user?: (data: LoginR) => StateU
+    data: LoginData,
+    token: (data: LoginResponse) => string,
+    user?: (data: LoginResponse) => StateUser
   ): Promise<AxiosResponse<R>>;
 
   public async check(
-    user?: (data: CheckR) => StateU
-  ): Promise<AxiosResponse<CheckR> | null>;
+    user?: (data: CheckResponse) => StateUser
+  ): Promise<AxiosResponse<CheckResponse> | null>;
 
-  public async logout(): Promise<AxiosResponse<LogoutR> | null>;
+  public async logout(): Promise<AxiosResponse<LogoutResponse> | null>;
 }
 
 declare const _default: PluginObject<Options>;
