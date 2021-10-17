@@ -5,15 +5,15 @@ import { preset } from "./preset";
 import { VueConstructor } from "vue";
 
 class Framework<
-  LoginD = unknown,
-  LoginR = unknown,
-  CheckR = unknown,
-  LogoutR = unknown,
-  StateU = unknown
+  LoginData = unknown,
+  LoginResponse = unknown,
+  CheckResponse = unknown,
+  LogoutResponse = unknown,
+  StateUser = unknown
 > {
   public readonly $axios: Options["axios"];
   public readonly $config: PresetConfig;
-  public readonly state: State<StateU>;
+  public readonly state: State<StateUser>;
 
   constructor(Vue: VueConstructor, options: Options) {
     this.$axios = options.axios;
@@ -26,10 +26,10 @@ class Framework<
     });
   }
 
-  public async login<D = LoginD, R = LoginR>(
+  public async login<D = LoginData, R = LoginResponse>(
     data: D,
     token: (data: R) => string,
-    user?: (data: R) => StateU
+    user?: (data: R) => StateUser
   ): Promise<AxiosResponse<R>> {
     const res = await this.$axios.post<R>(this.$config.routes.login, data);
 
@@ -40,8 +40,8 @@ class Framework<
     return res;
   }
 
-  public async check<R = CheckR>(
-    user?: (data: R) => StateU
+  public async check<R = CheckResponse>(
+    user?: (data: R) => StateUser
   ): Promise<AxiosResponse<R> | null> {
     const token = localStorage.getItem(this.$config.localStorageKey);
 
@@ -66,7 +66,7 @@ class Framework<
     return res;
   }
 
-  public async logout<R = LogoutR>(): Promise<AxiosResponse<R> | null> {
+  public async logout<R = LogoutResponse>(): Promise<AxiosResponse<R> | null> {
     if (!this.state.on) return null;
 
     const res = await this.$axios.post<R>(this.$config.routes.logout);
