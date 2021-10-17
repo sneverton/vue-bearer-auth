@@ -31,13 +31,13 @@ class Framework<
     token: (data: R) => string,
     user?: (data: R) => StateU
   ): Promise<AxiosResponse<R>> {
-    return this.$axios.post<R>(this.$config.routes.login, data).then((res) => {
-      localStorage.setItem(this.$config.localStorageKey, token(res.data));
+    const res = await this.$axios.post<R>(this.$config.routes.login, data);
 
-      if (user) this.state.user = user(res.data);
+    localStorage.setItem(this.$config.localStorageKey, token(res.data));
 
-      return res;
-    });
+    if (user) this.state.user = user(res.data);
+
+    return res;
   }
 
   public async check<R = CheckR>(
@@ -54,28 +54,28 @@ class Framework<
 
     const headers = { Authorization: `Bearer ${token}` };
 
-    return this.$axios
-      .post<R>(this.$config.routes.check, null, { headers })
-      .then((res) => {
-        this.state.checking = false;
-        this.state.on = true;
+    const res = await this.$axios.post<R>(this.$config.routes.check, null, {
+      headers,
+    });
 
-        if (user) this.state.user = user(res.data);
+    this.state.checking = false;
+    this.state.on = true;
 
-        return res;
-      });
+    if (user) this.state.user = user(res.data);
+
+    return res;
   }
 
   public async logout<R = LogoutR>(): Promise<AxiosResponse<R> | null> {
     if (!this.state.on) return null;
 
-    return this.$axios.post<R>(this.$config.routes.logout).then((res) => {
-      this.state.on = false;
-      this.state.user = null;
-      localStorage.removeItem(this.$config.localStorageKey);
+    const res = await this.$axios.post<R>(this.$config.routes.logout);
 
-      return res;
-    });
+    this.state.on = false;
+    this.state.user = null;
+    localStorage.removeItem(this.$config.localStorageKey);
+
+    return res;
   }
 }
 
