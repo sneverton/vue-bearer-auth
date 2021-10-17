@@ -7,22 +7,36 @@ class Framework {
         this.$config = merge({}, preset, options.config);
         this.state = Vue.observable({
             on: false,
-            checking: true,
             user: null,
+            checking: false,
+            loggingIn: false,
+            loggingOut: false,
         });
     }
     login(data, token, user) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.$axios.post(this.$config.routes.login, data).then((res) => {
+            if (this.state.on)
+                throw new Error("O usuário já está on.");
+            this.state.on = false;
+            this.state.loggingIn = true;
+            try {
+                const res = yield this.$axios.post(this.$config.routes.login, data);
                 localStorage.setItem(this.$config.localStorageKey, token(res.data));
+                this.state.on = true;
                 if (user)
                     this.state.user = user(res.data);
                 return res;
-            });
+            }
+            finally {
+                this.state.loggingIn = false;
+            }
         });
     }
     check(user) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (this.state.on)
+                throw new Error("O usuário já está on.");
+            this.state.checking = true;
             const token = localStorage.getItem(this.$config.localStorageKey);
             if (!token) {
                 this.state.checking = false;
@@ -30,27 +44,37 @@ class Framework {
                 return null;
             }
             const headers = { Authorization: `Bearer ${token}` };
-            return this.$axios
-                .post(this.$config.routes.check, null, { headers })
-                .then((res) => {
-                this.state.checking = false;
+            try {
+                const res = yield this.$axios.post(this.$config.routes.check, null, {
+                    headers,
+                });
                 this.state.on = true;
                 if (user)
                     this.state.user = user(res.data);
                 return res;
-            });
+            }
+            finally {
+                this.state.checking = false;
+            }
         });
     }
     logout() {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.state.on)
+                throw new Error("O usuário já está off.");
+            if (!this.state.on)
                 return null;
-            return this.$axios.post(this.$config.routes.logout).then((res) => {
+            this.state.loggingOut = true;
+            try {
+                const res = yield this.$axios.post(this.$config.routes.logout);
                 this.state.on = false;
                 this.state.user = null;
                 localStorage.removeItem(this.$config.localStorageKey);
                 return res;
-            });
+            }
+            finally {
+                this.state.loggingOut = false;
+            }
         });
     }
 }
